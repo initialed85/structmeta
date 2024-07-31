@@ -159,6 +159,22 @@ func introspect(t any, parent *Object, objects *[]*Object) (object *Object, err 
 		return object, nil
 	}
 
+	if typeOf == nil {
+		object = &Object{
+			Type:         typeOf,
+			PointerValue: nil,
+			SliceValue:   nil,
+			MapKey:       nil,
+			MapValue:     nil,
+			StructFields: nil,
+			Parent:       parent,
+		}
+
+		objectByType[typeOf] = object
+
+		return object, nil
+	}
+
 kindSwitch:
 	switch typeOf.Kind() {
 

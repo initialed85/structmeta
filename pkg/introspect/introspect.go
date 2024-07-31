@@ -161,6 +161,7 @@ func introspect(t any, parent *Object, objects *[]*Object) (object *Object, err 
 
 	if typeOf == nil {
 		object = &Object{
+			Name:         "any", // TODO: is this a safe assumption?
 			Type:         typeOf,
 			PointerValue: nil,
 			SliceValue:   nil,

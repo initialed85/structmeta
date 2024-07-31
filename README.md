@@ -84,7 +84,7 @@ func main() {
 	for _, otherObject := range object.PointerValue.StructFields {
 		// and find the field we're interested in
 		if otherObject.Field == "Grinch" {
-			// and extra a fresh zero'd instance of the type at that location (in this case, an anonymous struct)
+			// and extract a fresh zero'd instance of the type at that location (in this case, an anonymous struct)
 			// that is completely divorced from the original type itself
 			log.Printf("a new t.Grinch is %#+v", otherObject.Zero())
 		}

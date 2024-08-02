@@ -9,7 +9,7 @@ type Path struct {
 	Depth          int
 	VisitedObjects map[*Object]struct{}
 	Field          string
-	Tag            string
+	Tag            reflect.StructTag
 	Embedded       bool
 }
 
@@ -17,7 +17,7 @@ var objectByType = make(map[reflect.Type]*Object)
 
 type StructFieldObject struct {
 	Field    string
-	Tag      string
+	Tag      reflect.StructTag
 	Embedded bool
 	*Object
 }
@@ -106,24 +106,28 @@ func (o *Object) DebugFormat(paths ...*Path) string {
 
 	if o.PointerValue != nil {
 		path.Depth += 1
+		path.Field = "(ptr value)"
 		output += o.PointerValue.DebugFormat(path)
 		path.Depth -= 1
 	}
 
 	if o.SliceValue != nil {
 		path.Depth += 1
+		path.Field = "(slice elem)"
 		output += o.SliceValue.DebugFormat(path)
 		path.Depth -= 1
 	}
 
 	if o.MapKey != nil {
 		path.Depth += 1
+		path.Field = "(map key)"
 		output += o.MapKey.DebugFormat(path)
 		path.Depth -= 1
 	}
 
 	if o.MapValue != nil {
 		path.Depth += 1
+		path.Field = "(map elem)"
 		output += o.MapValue.DebugFormat(path)
 		path.Depth -= 1
 	}
@@ -301,7 +305,7 @@ kindSwitch:
 		objectByType[typeOf] = object
 
 		object.MapValue, err = introspect(
-			reflect.New(typeOf.Key()).Elem().Interface(),
+			reflect.New(typeOf.Elem()).Elem().Interface(),
 			object,
 			objects,
 		)
@@ -336,7 +340,7 @@ kindSwitch:
 
 			structFieldObject := &StructFieldObject{
 				Field:    field.Name,
-				Tag:      string(field.Tag),
+				Tag:      field.Tag,
 				Embedded: field.Anonymous,
 			}
 
@@ -371,10 +375,25 @@ kindSwitch:
 		reflect.UnsafePointer,
 		reflect.Func,
 		reflect.Invalid:
-		err = fmt.Errorf("unsupported kind %#+v", typeOf.Kind())
+		// TODO: figure out what to do here
+		// err = fmt.Errorf("unsupported kind %v (%#+v) for %#+v%v", typeOf.Kind().String(), typeOf.Kind(), t, parentSummary)
+
+		// TODO: because this probably isn't right
+		object = &Object{
+			Name:         "any",
+			Type:         reflect.TypeOf(new(interface{})),
+			PointerValue: nil,
+			SliceValue:   nil,
+			MapKey:       nil,
+			MapValue:     nil,
+			StructFields: nil,
+			Parent:       parent,
+		}
+
+		return object, nil
 
 	default:
-		err = fmt.Errorf("unhandled kind %#+v", typeOf.Kind())
+		err = fmt.Errorf("unhandled kind %v (%#+v) for %#+v", typeOf.Kind().String(), typeOf.Kind(), t)
 	}
 
 	if object == nil && err == nil {
@@ -441,7 +460,7 @@ kindSwitch:
 					reflect.StructField{
 						Name:    structField.Field,
 						Type:    reflect.TypeOf(structField.zero),
-						Tag:     reflect.StructTag(structField.Tag),
+						Tag:     structField.Tag,
 						PkgPath: "introspect",
 					},
 				)

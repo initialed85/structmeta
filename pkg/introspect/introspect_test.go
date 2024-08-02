@@ -25,6 +25,7 @@ type Thing struct {
 			} `json:"dilk"`
 		} `json:"bilk"`
 	} `json:"anon"`
+	Kapow map[string]*string `json:"kapow"`
 }
 
 func TestIntrospect(t *testing.T) {

@@ -465,7 +465,27 @@ kindSwitch:
 					},
 				)
 			}
-			otherObject.zero = reflect.New(reflect.StructOf(structFields)).Elem().Interface()
+
+			// TODO: not only is this problematic, I think its slow- let's hope I don't need it somewhere
+			// func() {
+			// 	defer func() {
+			// 		r := recover()
+			// 		if r != nil {
+			// 			log.Printf("warning: recovered from a panic that is probably related to the fact that the anonymous struct we're trying to create is too large")
+			// 			log.Printf("warning: the impact of this is that the Object.Zero() call for the output of Introspect(%#+v) will unexpectedly return nil", t)
+			// 		}
+			// 	}()
+
+			// 	a := reflect.StructOf(structFields)
+			// 	b := reflect.New(a)
+			// 	c := b.Elem()
+			// 	d := c.Interface()
+
+			// 	otherObject.zero = d
+			// }()
+
+			otherObject.zero = reflect.New(reflect.TypeOf(t)).Elem().Interface()
+
 			otherObject.handled = true
 		}
 	}

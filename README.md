@@ -33,7 +33,9 @@ type Object struct {
 
 So basically the hard work around reflection is done for you and you're left with an `Object` that represents the shape of the original struct.
 
-You can also call `.Zero()` on any `Object` to get an zero / empty instance of the struct that the `Object` represents.
+~~You can also call `.Zero()` on any `Object` to get an zero / empty instance of the struct that the `Object` represents.~~
+
+EDIT: I found some big performance issue that I couldn't ~~be bothered to~~ work out, so now `.Zero()` just returns a zero version of the original object.
 
 ## Usage
 
